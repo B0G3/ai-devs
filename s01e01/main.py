@@ -15,7 +15,6 @@ load_dotenv()
 client = instructor.from_openai(OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
 
 TODAY = date.today()
-PEOPLE_CSV = os.path.join(os.path.dirname(__file__), "people.csv")
 
 Tag = Literal[
     "IT",
@@ -37,9 +36,11 @@ class TaggedPeople(BaseModel):
     people: list[TaggedPerson]
 
 
-def load_people(path: str) -> list[dict]:
-    with open(path, newline="", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
+def load_people(url: str) -> list[dict]:
+    response = requests.get(url)
+    response.raise_for_status()
+    lines = response.text.splitlines()
+    return list(csv.DictReader(lines))
 
 
 def age(birth_date_str: str) -> int:
@@ -84,8 +85,11 @@ def tag_people(people: list[dict]) -> list[TaggedPerson]:
 
 
 def main():
+    hub_url = os.getenv("HUB_URL")
+    api_key = os.getenv("AGENT_API_KEY")
+
     print("[1/4] Loading and filtering people...")
-    people = load_people(PEOPLE_CSV)
+    people = load_people(f"{hub_url}/data/{api_key}/people.csv")
     results = filter_people(people)
     print(f"      → {len(results)} people matched (M, age 20-40, Grudziądz)")
 
@@ -110,14 +114,19 @@ def main():
         for p in filtered
     ]
 
-    print("[4/4] Posting to hub...")
+    print("[4/4] Writing output and posting to hub...")
+    output_path = os.path.join(os.path.dirname(__file__), "output.json")
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+    print(f"      → written to {output_path}")
+
     payload = {
-        "apikey": os.getenv("AGENT_API_KEY"),
+        "apikey": api_key,
         "task": "people",
         "answer": output,
     }
 
-    response = requests.post(os.getenv("HUB_URL"), json=payload)
+    response = requests.post(f"{hub_url}/verify", json=payload)
     print(f"      → {response.status_code}: {response.json()}")
 
 
