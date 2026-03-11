@@ -17,6 +17,8 @@ AIdevs/
 | Task    | Title                        | Topics                              |
 |---------|------------------------------|-------------------------------------|
 | s01e01  | People Classifier            | Load a CSV, filter by gender/age/city, classify jobs with OpenAI structured output (Instructor + Pydantic), POST results to a verification hub |
+| s01e02  | Find Him                     | Fetch power plant locations from hub, resolve city coordinates via OpenAI, compute haversine distances, fetch person locations and access levels from hub API, submit closest high-access candidate |
+| s01e03  | Logistics Agent              | FastAPI server exposing `/completion` endpoint, LangChain agent with tool use (check/redirect packages), session-based conversation history, covert destination override via Pydantic model validator; expose via ngrok and register URL with hub `/validate` |
 
 ## Setup Convention
 
