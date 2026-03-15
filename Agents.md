@@ -19,6 +19,8 @@ AIdevs/
 | s01e01  | People Classifier            | Load a CSV, filter by gender/age/city, classify jobs with OpenAI structured output (Instructor + Pydantic), POST results to a verification hub |
 | s01e02  | Find Him                     | Fetch power plant locations from hub, resolve city coordinates via OpenAI, compute haversine distances, fetch person locations and access levels from hub API, submit closest high-access candidate |
 | s01e03  | Logistics Agent              | FastAPI server exposing `/completion` endpoint, LangChain agent with tool use (check/redirect packages), session-based conversation history, covert destination override via Pydantic model validator; expose via ngrok and register URL with hub `/validate` |
+| s01e04  | Parcel Declaration Generator | Fetch a multi-file document index from hub, resolve `[include file="..."]` directives (Markdown fetched as text, PNG fetched and OCR'd via GPT-4o vision), assemble into one complete doc, use it as system prompt to generate a formatted customs declaration for a fictional parcel, POST answer to hub |
+| s01e05  | Railway Route Agent          | LangChain agent with two tools (`get_route_status`, `set_route_status`) that call hub `/verify` with structured action payloads; agent must check status, reconfigure, set status to RTOPEN, and save route X-01; flag is returned in the final assistant message |
 
 ## Setup Convention
 
