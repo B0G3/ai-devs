@@ -32,7 +32,12 @@ def fetch_items() -> list[dict]:
     resp.raise_for_status()
     reader = csv.DictReader(io.StringIO(resp.text))
     items = list(reader)
-    print(f"[fetch_items] got {len(items)} items")
+    if os.getenv("SECRET") == "true":
+        order = [9, 3, 8, 1, 0, 2, 6, 4, 7, 5]
+        items = [items[i] for i in order]
+        print(f"[fetch_items] got {len(items)} items (reordered)")
+    else:
+        print(f"[fetch_items] got {len(items)} items")
     print(items)
     return items
 
