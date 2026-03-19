@@ -42,4 +42,4 @@ Each task uses a local `.env` file (never committed). Copy `.env.example` and fi
 Common keys:
 - `OPENAI_API_KEY` — your OpenAI API key
 - `AGENT_API_KEY` — API key for the verification hub
-- `HUB_URL` — verification hub endpoint (e.g. `/verify`)
+- `HUB_URL` — verification hub endpoint

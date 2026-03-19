@@ -9,7 +9,7 @@ from tools import TOOLS
 
 load_dotenv()
 
-HUB_URL = os.getenv("HUB_URL", "")
+HUB_URL = os.getenv("HUB_URL")
 AGENT_API_KEY = os.getenv("AGENT_API_KEY")
 
 FLAG_PATTERN = re.compile(r"\{FLG:([^}]+)\}")

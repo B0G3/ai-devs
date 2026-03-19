@@ -1,10 +1,13 @@
+import base64
+import io
 import os
+import zipfile
 from typing import Any
 
 import requests
 from langchain_core.tools import tool
 
-HUB_URL = os.getenv("HUB_URL", "")
+HUB_URL = os.getenv("HUB_URL")
 AGENT_API_KEY = os.getenv("AGENT_API_KEY")
 
 
@@ -38,6 +41,46 @@ def verify_answer(password: str, date: str, confirmation_code: str) -> dict:
 
     print(f"<<< [verify_answer] {result}")
     return result
+
+
+@tool
+def decode_attachment(data_uri: str) -> dict:
+    """Decode a base64 data URI attachment and return its contents.
+
+    Supports ZIP archives (extracts all text files) and plain text/binary data.
+
+    Args:
+        data_uri: The full data URI string, e.g. 'data:application/zip;base64,<base64data>'
+
+    Returns:
+        A dict with 'files' mapping filename -> text content, or 'error' on failure.
+    """
+    try:
+        if "," not in data_uri:
+            return {"error": "Invalid data URI format"}
+        header, encoded = data_uri.split(",", 1)
+        raw = base64.b64decode(encoded)
+
+        if "zip" in header:
+            files = {}
+            with zipfile.ZipFile(io.BytesIO(raw)) as zf:
+                for name in zf.namelist():
+                    with zf.open(name) as f:
+                        try:
+                            files[name] = f.read().decode("utf-8")
+                        except UnicodeDecodeError:
+                            files[name] = f.read().decode("latin-1")
+            print(f"[decode_attachment] extracted zip files: {list(files.keys())}")
+            return {"files": files}
+        else:
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                text = raw.decode("latin-1")
+            print(f"[decode_attachment] decoded text: {text[:200]}")
+            return {"files": {"content": text}}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @tool

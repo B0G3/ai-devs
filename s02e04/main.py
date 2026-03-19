@@ -10,7 +10,7 @@ from langchain_openai import ChatOpenAI
 
 from tools import TOOLS
 
-HUB_URL = os.getenv("HUB_URL", "")
+HUB_URL = os.getenv("HUB_URL")
 AGENT_API_KEY = os.getenv("AGENT_API_KEY")
 
 FLAG_PATTERN = re.compile(r"\{FLG:([^}]+)\}")
@@ -33,17 +33,18 @@ Always call one tool at a time.
 """
 
 
-def solve_agentic():
-    llm = ChatOpenAI(
-        model="gpt-5-nano-2025-08-07",
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-        max_tokens=4096,
-    )
-    agent = create_agent(llm, TOOLS, system_prompt=_SYSTEM_PROMPT)
+_SECRET_USER_PROMPT = """Search the zmail inbox to find a secret flag hidden within email attachments.
 
-    result = agent.invoke(
-        {"messages": [("human",
-            """Search the zmail inbox to find three pieces of information:
+Start by calling the help action to understand available API actions.
+Then browse all emails and their attachments, looking for a hidden flag matching the pattern {{FLG:...}}.
+When you encounter an email with an 'attachment' field, use the decode_attachment tool with the attachment's 'data' value to extract the file contents.
+Check every attachment in every email — the flag may be embedded in text files inside a ZIP archive.
+
+Once you find the flag, report it clearly as:
+- flag: {{FLG:<value>}}
+"""
+
+_DEFAULT_USER_PROMPT = """Search the zmail inbox to find three pieces of information:
 
 1. date - the date (YYYY-MM-DD format) when the security department plans an attack on our power plant
 2. password - a password to the employee system that was sent to this mailbox
@@ -60,7 +61,21 @@ Once you have all three values, report them clearly as:
 Then submit the answer using the verify_answer tool with the three values.
 If the verify answer returns a FLG / flag - we've succeeded.
 """
-        )]},
+
+
+def solve_agentic():
+    secret_mode = os.getenv("SECRET", "").lower() in ("1", "true", "yes")
+    user_prompt = _SECRET_USER_PROMPT if secret_mode else _DEFAULT_USER_PROMPT
+
+    llm = ChatOpenAI(
+        model="gpt-5-nano-2025-08-07",
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        max_tokens=4096,
+    )
+    agent = create_agent(llm, TOOLS, system_prompt=_SYSTEM_PROMPT)
+
+    result = agent.invoke(
+        {"messages": [("human", user_prompt)]},
     )
 
     output = result["messages"][-1].content

@@ -11,7 +11,7 @@ from .image_utils import prepare_image, interpret_circuit_image
 load_dotenv()
 
 FLAG_PATTERN = re.compile(r"\{FLG:([^}]+)\}")
-TARGET_IMAGE_URL = os.getenv("TARGET_IMAGE_URL", "/i/solved_electricity.png")
+TARGET_IMAGE_URL = os.getenv("TARGET_IMAGE_URL")
 
 
 def _get_with_retry(url: str) -> requests.Response:

@@ -15,7 +15,7 @@ def download_logs() -> str:
     Download the failure log from the hub and save it locally.
     Must be called before search_logs. Returns the number of lines downloaded.
     """
-    hub_url = os.getenv("HUB_URL", "")
+    hub_url = os.getenv("HUB_URL")
     api_key = os.getenv("AGENT_API_KEY")
     url = f"{hub_url}/data/{api_key}/failure.log"
     print(f"[download_logs] fetching {url}")
@@ -115,7 +115,7 @@ def send_file_to_hub(content: str) -> str:
     content: the log lines to submit (plain text).
     Returns the hub's raw response text.
     """
-    hub_url = os.getenv("HUB_URL", "")
+    hub_url = os.getenv("HUB_URL")
     print(f"[send_file_to_hub] submitting {len(content.splitlines())} lines to {hub_url}/verify")
     resp = requests.post(
         f"{hub_url}/verify",
